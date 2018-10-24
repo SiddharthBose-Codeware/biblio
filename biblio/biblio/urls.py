@@ -15,7 +15,19 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
+from api.views import *
+from biblio.views import *
+from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('api/auth/create_user', CreateUserAccountAPIView.as_view()),
+    path('api/auth/create_admin', CreateAdminAccountAPIView.as_view()),
+    path('api/auth/login_user', LoginUserAPIView.as_view()),
+    path('api/auth/login_admin', LoginAdminAPIView.as_view()),
+    path('api/auth/update_account_details', UpdateAccountAPIView.as_view()),
+    path('api/auth/token', TokenObtainPairView.as_view()),
+    path('api/auth/refresh_token', TokenRefreshView.as_view())
+
+    # path('api/', APIView.as_view())
 ]
