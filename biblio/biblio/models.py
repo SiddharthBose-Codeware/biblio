@@ -3,7 +3,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.contrib.auth.models import AbstractBaseUser
 from polymorphic.models import PolymorphicModel
 
-from biblio.usersmanager import *
+from biblio.managers import *
 
 # class Account(AbstractBaseUser):
 #     # first_name = models.CharField(max_length = 255, default = "")
@@ -16,6 +16,159 @@ from biblio.usersmanager import *
 #     admin = models.BooleanField(default=False)
 #
 #     USERNAME_FIELD = 'email'
+
+class LibrarySubjectType(models.Model):
+
+     parent = models.ForeignKey('self', on_delete = models.CASCADE, blank = True, null = True)
+
+     itemTypeValue = models.CharField(max_length = 200, default = "", unique = True)
+
+class LibraryAuthor(models.Model):
+
+    name = models.CharField(max_length = 200, default = "")
+
+class LibraryItemType(PolymorphicModel):
+
+    type = models.CharField(max_length = 200, default = "", null = True)
+
+class LibraryBookItemType(LibraryItemType):
+
+    pass
+
+class LibraryItem(PolymorphicModel):
+
+    name = models.CharField(max_length = 400, default = "")
+
+    author = models.ForeignKey(LibraryAuthor, on_delete = models.CASCADE)
+
+    itemType = models.ForeignKey(LibraryItemType, on_delete = models.CASCADE)
+
+    subjectType = models.ForeignKey(LibrarySubjectType, on_delete = models.CASCADE)
+
+class LibraryBookItem(LibraryItem):
+
+    ISBNCode = models.BigIntegerField(default = "")
+
+class LibraryItemIssue(models.Model):
+
+    item = models.ForeignKey(LibraryItem, on_delete = models.CASCADE)
+
+    issuedToUser = models.ForeignKey('UserAccount', on_delete = models.CASCADE)
+
+    issuedAT = models.DateField(auto_now = True)
+
+    returnDate = models.DateField()
+
+class Library(models.Model):
+
+    name = models.CharField(max_length = 1000, default = "")
+
+    subjectTypes = models.ManyToManyField(LibrarySubjectType)
+
+    authors = models.ManyToManyField(LibraryAuthor)
+
+    itemTypes = models.ManyToManyField(LibraryItemType)
+
+    items = models.ManyToManyField(LibraryItem)
+
+    issues = models.ManyToManyField(LibraryItemIssue)
+
+    def addSubjectType(self, itemTypeValue, parent = None, isRoot = False):
+
+        print(itemTypeValue)
+
+        subjectType = LibrarySubjectType()
+
+        subjectType.itemTypeValue = itemTypeValue
+
+        if not isRoot:
+
+            subjectType.parent = parent
+
+        subjectType.save()
+
+        self.subjectTypes.add(subjectType)
+
+        return subjectType
+
+    def addAuthor(self, authorName):
+
+        author = LibraryAuthor()
+
+        author.name = authorName
+
+        author.save()
+
+        self.authors.add(author)
+
+        return author
+
+    def addItemType(self, type = None, isBookItemType = False):
+
+        item = None
+
+        if isBookItemType:
+
+            item = LibraryItemType()
+
+            item.type = None
+
+        else:
+
+            item = LibraryBookItemType()
+
+            item.type = type
+
+        item.save()
+
+        self.itemTypes.add(item)
+
+        return item
+
+    def addItem(self, data, isBook = False):
+
+        item = None
+
+        if isBook:
+
+            item = LibraryBookItem()
+
+            item.name = data['name']
+            item.author = data['author']
+            item.itemType = data['itemType']
+            item.subjectType = data['subjectType']
+            item.ISBNCode = data['ISBNCode']
+
+        else:
+
+            item = LibraryItem()
+
+            item.name = data['name']
+            item.author = data['author']
+            item.itemType = data['itemType']
+            item.subjectType = data['subjectType']
+
+        item.save()
+
+        self.items.add(item)
+
+        return item
+
+    def addLibraryItemIssue(self, data):
+
+        issue = LibraryItemIssue()
+
+        issue.item = data['item']
+
+        issue.issuedToUser = data['issuedToUser']
+
+        issue.returnDate = data['returnDate']
+
+        issue.save()
+
+        self.issues.add(issue)
+
+        return issue
 
 class Account(AbstractBaseUser, PolymorphicModel):
 
@@ -76,31 +229,3 @@ class UserAccount(Account):
             self.library.save()
 
         self.save()
-
-class LibrarySubjectType(models.Model):
-
-     parent = models.ForeignKey(self, null = True)
-
-     itemTypeValue = models.CharField(max_length = 200, default = "")
-
-class LibraryAuthor(models.Model):
-
-    name = models.CharField(max_length = 200, default = "")
-
-class LibraryItem(models.Model):
-
-    itemName = models.CharField(max_length = 200, default = "")
-
-    subject = models.OneToOneField(LibrarySubjectType)
-
-    author = models.OneToOneField(LibraryAuthor)
-
-class Library(models.Model):
-
-    name = models.CharField(max_length = 1000, default = "")
-
-    subjectTypes = models.ManyToManyField(LibrarySubjectType, null = True)
-
-    authors = models.OneToOneField(LibraryAuthor, null = True)
-
-    libraryItems = models.ManyToManyField(LibraryItem, null = True)

@@ -3,7 +3,7 @@ import argon2
 
 from biblio.models import *
 
-from biblio.usersmanager import AdminManager, UserManager
+from biblio.managers import AdminManager, UserManager
 
 from biblio import settings
 

@@ -4,6 +4,7 @@ from polymorphic.managers import PolymorphicManager
 import biblio.models
 
 class AccountManager(BaseUserManager, PolymorphicManager):
+
     pass
 
 class UserManager(AccountManager):

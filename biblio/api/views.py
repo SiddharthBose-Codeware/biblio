@@ -1,10 +1,14 @@
 from django.shortcuts import render
 from rest_framework.views import APIView
 from rest_framework.response import Response
+from rest_framework import viewsets, generics
 from django.http import JsonResponse
 from api.serializers import *
 from api.modelfunctions import *
 from rest_framework.permissions import AllowAny, IsAuthenticated
+
+import json
+import urllib
 
 class CreateUserAccountAPIView(APIView):
 
@@ -210,10 +214,563 @@ class UpdateAccountAPIView(APIView):
 
         })
 
-class AddLibraryItemType(APIView):
+class LibrarySubjectTypeView(viewsets.ModelViewSet):
 
     permission_classes = (IsAuthenticated,)
 
-    def post(self, request):
+    serializer_class = LibrarySubjectTypeSerializer
 
-        pass
+    def get_queryset(self):
+
+        # data = self.request.user.library.subjectTypes
+        #
+        # help(data)
+        #
+        # serializer = LibrarySubjectTypeSerializer(data, many = True)
+        #
+        # return Response(serializer.data)
+
+        return self.request.user.library.subjectTypes.get_queryset()
+
+    def create(self, request, *args, **kwargs):
+
+        # request.user.library.addSubjectType(request.GET['itemTypeValue'], request.GET['parent'])
+
+        if 'parent' in request.GET:
+
+            subjectTypeSerializer = self.get_serializer(data = {
+
+                'itemTypeValue': request.GET['itemTypeValue'],
+                'parent':  request.GET['parent']
+
+            })
+
+        else:
+
+            subjectTypeSerializer = self.get_serializer(data = {
+
+                'itemTypeValue': request.GET['itemTypeValue']
+
+            })
+
+
+        if subjectTypeSerializer.is_valid():
+
+            object = subjectTypeSerializer.save()
+
+            return JsonResponse({
+
+                'status': True,
+                'message': "Created a new subject type.",
+                'id': object.pk
+
+            })
+
+        else:
+
+                return JsonResponse({
+
+                    'status': False,
+                    'message': subjectTypeSerializer.errors
+
+                })
+
+    def partial_update(self, request, *args, **kwargs):
+
+        object = LibrarySubjectType.objects.filter(pk = kwargs['pk'])[0]
+
+        updationData = {
+
+            'itemTypeValue': object.itemTypeValue,
+            'parent': object.parent
+
+        }
+
+        updatedObject = self.get_serializer(data = updationData).partial_update(object, request.GET)
+
+        return JsonResponse({
+
+            'status': True,
+            'newObjectData': updationData
+
+        })
+
+    def destroy(self, request, *args, **kwargs):
+
+        object = LibrarySubjectType.objects.filter(pk = kwargs['pk'])[0]
+
+        object.delete();
+
+        return JsonResponse({
+
+            'status': True,
+            'message': "The subject type has been deleted."
+
+        })
+
+    # def create(self, serializer):
+    #
+    #     help(self)
+    #
+    #     serializer.save(data = self.request.GET)
+
+class LibraryAuthorView(viewsets.ModelViewSet):
+
+    permission_classes = (IsAuthenticated,)
+
+    serializer_class = LibraryAuthorSerializer
+
+    def get_queryset(self):
+
+        # data = self.request.user.library.subjectTypes
+        #
+        # help(data)
+        #
+        # serializer = LibrarySubjectTypeSerializer(data, many = True)
+        #
+        # return Response(serializer.data)
+
+        return self.request.user.library.authors.get_queryset()
+
+    def create(self, request, *args, **kwargs):
+
+        authorSerializer = self.get_serializer(data = {
+
+            'name': request.GET['name']
+
+        })
+
+        if authorSerializer.is_valid():
+
+            object = authorSerializer.save()
+
+            return JsonResponse({
+
+                'status': True,
+                'message': "Author added to library.",
+                'id': object.pk
+
+            })
+
+        else:
+
+                return JsonResponse({
+
+                    'status': False,
+                    'message': subjectTypeSerializer.errors
+
+                })
+
+    def partial_update(self, request, *args, **kwargs):
+
+        object = LibraryAuthor.objects.filter(pk = kwargs['pk'])[0]
+
+        updationData = {
+
+            'name': object.name
+
+        }
+
+        updatedObject = self.get_serializer(data = updationData).partial_update(object, request.GET)
+
+        return JsonResponse({
+
+            'status': True,
+            'newObjectData': updationData
+
+        })
+
+    def destroy(self, request, *args, **kwargs):
+
+        object = LibraryAuthor.objects.filter(pk = kwargs['pk'])[0]
+
+        object.delete();
+
+        return JsonResponse({
+
+            'status': True,
+            'message': "The author has been deleted."
+
+        })
+
+class LibraryItemTypeView(viewsets.ModelViewSet):
+
+    permission_classes = (IsAuthenticated,)
+
+    serializer_class = LibraryItemTypeSerializer
+
+    def get_queryset(self):
+
+        # data = self.request.user.library.subjectTypes
+        #
+        # help(data)
+        #
+        # serializer = LibrarySubjectTypeSerializer(data, many = True)
+        #
+        # return Response(serializer.data)
+
+        return self.request.user.library.itemTypes.get_queryset()
+
+    def createItemType(self, itemTypeSerializer):
+
+        if itemTypeSerializer.is_valid():
+
+            object = itemTypeSerializer.save()
+
+            return JsonResponse({
+
+                'status': True,
+                'message': "Item type added to library.",
+                'id': object.pk
+
+            })
+
+        else:
+
+                return JsonResponse({
+
+                    'status': False,
+                    'message': subjectTypeSerializer.errors
+
+                })
+
+    def create(self, request, *args, **kwargs):
+
+        itemTypeSerializer = self.get_serializer(data = {
+
+            'type': request.GET['type']
+
+        })
+
+        return self.createItemType(itemTypeSerializer = itemTypeSerializer)
+
+    def partial_update(self, request, *args, **kwargs):
+
+        object = LibraryItemType.objects.filter(pk = kwargs['pk'])[0]
+
+        updationData = {
+
+            'type': object.type
+
+        }
+
+        updatedObject = self.get_serializer(data = updationData).partial_update(object, request.GET)
+
+        return JsonResponse({
+
+            'status': True,
+            'newObjectData': updationData
+
+        })
+
+    def destroy(self, request, *args, **kwargs):
+
+        object = LibraryItemType.objects.filter(pk = kwargs['pk'])[0]
+
+        object.delete();
+
+        return JsonResponse({
+
+            'status': True,
+            'message': "The item type has been deleted."
+
+        })
+
+class LibraryBookItemTypeView(LibraryItemTypeView):
+
+    serializer_class = LibraryBookItemTypeSerializer
+
+    def get_queryset(self):
+
+        return self.request.user.library.itemTypes.filter(type = None)
+
+    def create(self, request, *args, **kwargs):
+
+        itemTypeSerializer = self.get_serializer(data = {})
+
+        help(itemTypeSerializer)
+
+        return self.createItemType(itemTypeSerializer = itemTypeSerializer)
+
+class LibraryItemView(viewsets.ModelViewSet):
+
+    permission_classes = (IsAuthenticated,)
+
+    serializer_class = LibraryItemSerializer
+
+    def get_queryset(self):
+
+        # data = self.request.user.library.subjectTypes
+        #
+        # help(data)
+        #
+        # serializer = LibrarySubjectTypeSerializer(data, many = True)
+        #
+        # return Response(serializer.data)
+
+        return self.request.user.library.items.get_queryset()
+
+    def create(self, request, *args, **kwargs):
+
+        itemSerializer = self.get_serializer(data = {
+
+            'name': request.GET['name'],
+            'author': request.GET['author'],
+            'itemType': request.GET['itemType'],
+            'subjectType': request.GET['subjectType']
+
+        })
+
+        if itemSerializer.is_valid():
+
+            object = itemSerializer.save()
+
+            return JsonResponse({
+
+                'status': True,
+                'message': "Item added to library.",
+                'id': object.pk
+
+            })
+
+        else:
+
+                return JsonResponse({
+
+                    'status': False,
+                    'message': itemSerializer.errors
+
+                })
+
+    def partial_update(self, request, *args, **kwargs):
+
+        object = LibraryItem.objects.filter(pk = kwargs['pk'])[0]
+
+        updationData = {
+
+            'name': object.name
+
+        }
+
+        updatedObject = self.get_serializer(data = updationData).partial_update(object, request.GET)
+
+        return JsonResponse({
+
+            'status': True,
+            'newObjectData': updationData
+
+        })
+
+    def destroy(self, request, *args, **kwargs):
+
+        object = LibraryItem.objects.filter(pk = kwargs['pk'])[0]
+
+        object.delete();
+
+        return JsonResponse({
+
+            'status': True,
+            'message': "The item has been deleted."
+
+        })
+
+class LibraryItemView(viewsets.ModelViewSet):
+
+    permission_classes = (IsAuthenticated,)
+
+    serializer_class = LibraryItemSerializer
+
+    def get_queryset(self):
+
+        # data = self.request.user.library.subjectTypes
+        #
+        # help(data)
+        #
+        # serializer = LibrarySubjectTypeSerializer(data, many = True)
+        #
+        # return Response(serializer.data)
+
+        return self.request.user.library.items.get_queryset()
+
+    def get_serializer_class(self):
+
+        if self.request.GET['itemType'] is None:
+
+            return LibraryBookItemSerializer
+
+        return LibraryItemSerializer
+
+    # def getLibraryItemSerializer(self, data):
+    #
+    #     if data['itemType'] is None:
+    #
+    #         return self.get_serializer_class(data = {
+    #
+    #             'name': data['name'],
+    #             'author': data['author'],
+    #             'itemType': data['itemType'],
+    #             'subjectType': data['subjectType'],
+    #             'ISBNCode': data['ISBNCode']
+    #
+    #         })
+    #
+    #     itemSerializer = self.get_serializer_class(data = {
+    #
+    #         'name': data['name'],
+    #         'author': data['author'],
+    #         'itemType': data['itemType'],
+    #         'subjectType': data['subjectType']
+    #
+    #     })
+
+    def createItem(self, itemSerializer):
+
+        if itemSerializer.is_valid():
+
+            object = itemSerializer.save()
+
+            return JsonResponse({
+
+                'status': True,
+                'message': "Item added to library.",
+                'id': object.pk
+
+            })
+
+        else:
+
+                return JsonResponse({
+
+                    'status': False,
+                    'message': itemSerializer.errors
+
+                })
+
+    def create(self, request, *args, **kwargs):
+
+        itemSerializer = None
+
+        if request.GET['itemType'] is None:
+
+            itemSerializer = self.get_serializer(data = {
+
+                'name': request.GET['name'],
+                'author': request.GET['author'],
+                'itemType': request.GET['itemType'],
+                'subjectType': request.GET['subjectType'],
+                'ISBNCode': request.GET['ISBNCode']
+
+            })
+
+        else:
+
+            itemSerializer = self.get_serializer(data = {
+
+                'name': request.GET['name'],
+                'author': request.GET['author'],
+                'itemType': request.GET['itemType'],
+                'subjectType': request.GET['subjectType']
+
+            })
+
+        # help(itemSerializer)
+
+        return self.createItem(itemSerializer)
+
+    def partial_update(self, request, *args, **kwargs):
+
+        object = LibraryItem.objects.filter(pk = kwargs['pk'])[0]
+
+        updationData = {
+
+            'name': object.name
+
+        }
+
+        updatedObject = self.get_serializer(data = updationData).partial_update(object, request.GET)
+
+        return JsonResponse({
+
+            'status': True,
+            'newObjectData': updationData
+
+        })
+
+    def destroy(self, request, *args, **kwargs):
+
+        object = LibraryItem.objects.filter(pk = kwargs['pk'])[0]
+
+        object.delete();
+
+        return JsonResponse({
+
+            'status': True,
+            'message': "The item has been deleted."
+
+        })
+
+class LibraryBookItemView(LibraryItemView):
+
+    serializer_class = LibraryBookItemSerializer
+
+    def get_queryset(self):
+
+        return self.request.user.library.itemTypes.filter(type = None)
+
+    def create(self, request, *args, **kwargs):
+
+        bookItemSerializer = self.get_serializer(data = {
+
+            'name': request.GET['name'],
+            'author': request.GET['author'],
+            'itemType': request.GET['itemType'],
+            'subjectType': request.GET['subjectType'],
+            'ISBNCode': request.GET['ISBNCode']
+
+        })
+
+        return self.createItem(bookItemSerializer)
+
+
+class LibraryItemIssueView(viewsets.ModelViewSet):
+
+    serializer_class = LibraryItemIssueSerializer
+
+    def get_queryset(self):
+
+        return self.request.user.library.issues.get_queryset()
+
+    def createIssue(self, itemIssueSerializer):
+
+        if itemIssueSerializer.is_valid():
+
+            object = itemIssueSerializer.save()
+
+            return JsonResponse({
+
+                'status': True,
+                'message': "Item issued",
+                'id': object.pk
+
+            })
+
+        else:
+
+                return JsonResponse({
+
+                    'status': False,
+                    'message': itemIssueSerializer.errors
+
+                })
+
+    def create(self, request, *args, **kwargs):
+
+        itemIssueSerializer = self.get_serializer(data = {
+
+            'item': request.GET['item'],
+            'issuedToUser': request.GET['issuedToUser'],
+            'returnDate': request.GET['returnDate']
+
+        })
+
+        return self.createIssue(itemIssueSerializer)
