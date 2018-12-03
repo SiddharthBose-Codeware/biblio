@@ -1,0 +1,270 @@
+#example {
+  margin-bottom:0;
+}
+
+.custom-sidebar {
+  background-color:#393d41;
+  width:100%;
+  height:100%;
+  display:inline-block;
+  box-shadow:2px 2px 10px 2px rgba(0,0,0,0.2);
+  font-family:'Comfortaa';
+}
+
+.col-md-4.remove-padding-margin {
+  padding:0;
+  margin:0;
+}
+
+.sidebar-heading {
+  color:#FFFFFF;
+  text-align:center;
+  height:50px;
+  width:100%;
+}
+
+html, body {
+  height:100%;
+}
+
+.custom-sidebar-link:hover {
+  background-color:#FFFFFF;
+  color:#000000;
+  text-decoration:none;
+}
+
+.custom-sidebar-link {
+  font-size:30px;
+  width:100%;
+  padding:20px 10px;
+  box-sizing:border-box;
+  color:#FFFFFF;
+  display:block;
+}
+
+.sidebar-content-wrapper {
+  width:100%;
+  box-sizing:border-box;
+  padding:20px 0px 20px 0;
+}
+
+.sidebar-content {
+  width:100%;
+}
+
+.work-area-container {
+  padding:5%;
+  background-color:#ECEFF1;
+  height:100%;
+}
+
+.table tr, .table thead tr th, .table tbody tr td {
+  border:1px solid rgba(0, 0, 0, 0.2);
+}
+
+.table-responsive.custom-table {
+}
+
+.table-wrapper {
+  padding:100px 0 0 0;
+}
+
+.btn.btn-default.btn-delete {
+  background-color:#EF5350;
+}
+
+.btn.btn-default.btn-edit {
+  background-color:#3F51B5;
+}
+
+btn-edit, btn-delete {
+  outline:none;
+}
+
+.btn.btn-default.add-new-btn {
+}
+
+.add-new-btn-wrapper {
+  padding:20px 0;
+}
+
+.btn.btn-default.btn-add-new {
+  background-color:#00796B;
+}
+
+.navbar-nav > li > .dropdown-menu {
+}
+
+.work-area-heading {
+  font-family:Comfortaa;
+}
+
+.table.custom-table {
+  box-shadow:1px 1px 10px 2px rgba(0, 0, 0, 0.2);
+}
+
+.work-area-wrapper {
+  background-color:#FFFFFF;
+  padding:20px;
+  border-radius:10px;
+}
+
+.sidebar-heading h1 {
+  font-family:Comfortaa;
+}
+
+@media (max-width: 992px) {
+  .col-md-4.custom-sidebar-wrapper {
+    position:absolute;
+    z-index:1;
+  }
+  .col-md-8 {
+    max-width: 100%;
+    flex: 100%;
+  }
+}
+
+@media (max-width: 1126px) {
+  .sidebar-content-wrapper {
+    padding: 80px 0 0 0;
+  }
+  .col-md-4.custom-sidebar-wrapper {
+    transform: translateX(0);
+  }
+}
+
+.col-md-4.custom-sidebar-wrapper {
+  transition: all 0.5s linear;
+}
+
+@media (max-width: 767px) {
+  .col-md-4.custom-sidebar-wrapper {
+    transform: translateX(0);
+  }
+}
+
+@media (max-width: 767px) {
+  .toggled {
+    transform: translateX(-100%);
+  }
+}
+
+.loader-wrapper {
+  position:fixed;
+  height:100%;
+  width:100%;
+  background-color:rgba(255, 255, 255, 1);
+  top:0;
+  left:0;
+  margin:auto;
+  text-align:center;
+  opacity:1;
+  transition:all 0.1s ease-out;
+  z-index: 100000000;
+  animation:loading-wrapper-animation 0.2s ease-in;
+  /* display: none; */
+}
+
+.loader-spinner {
+  content:'';
+  display:inline-block;
+  transform:translateY(-50%);
+  padding:50% 0 0 0;
+}
+
+.glyphicon.glyphicon-star.loader-spinner-icon {
+  display:inline-block;
+}
+
+.fa.fa-rotate-right.spinner-icon {
+  font-size:50px;
+  display:inline-block;
+  animation:loading-spinner 0.5s linear infinite;
+}
+
+@keyframes loading-spinner {
+  0% {
+    transform:rotate(0);
+  }
+  100% {
+    transform:rotate(360deg);
+  }
+}
+
+@keyframes loading-wrapper-animation {
+  0% {
+    height:0;
+    width:0;
+    top:50%;
+    left:50%;
+    opacity:0;
+  }
+  100% {
+    height:100%;
+    width:100%;
+    top:0;
+    left:0;
+    opacity:1;
+  }
+}
+
+.modal-filters-container {
+  padding:10px;
+  overflow:auto;
+  display:flex;
+}
+
+.label.label-default.custom-label {
+  background-color:inherit;
+  color:#555555;
+}
+
+.model-table-wrapper {
+  padding:20px 0;
+  overflow:auto;
+}
+
+.form-logo {
+  font-size:xx-large;
+  color:#000000;
+  font-family:Comfortaa;
+}
+
+.nav-tabs a {
+  font-size:15px;
+  color:#777;
+}
+
+.tab-pane p {
+  font-size:30px;
+}
+
+.nav-tabs > .active a {
+  color:#FF0000;
+}
+
+.icon.ion-android-notifications.header-notification-bell {
+  font-size:30px;
+}
+
+.library-search-input {
+  width:100%;
+  margin:auto;
+  margin-left:1px;
+}
+
+.navbar-light .navbar-custom-brand {
+  color:#FFFFFF;
+}
+
+.navbar-light .navbar-custom-brand {
+  color:#FFFFFF;
+}
+
+.navbar-light .navbar-custom-brand {
+  color:#FFFFFF;
+}
+
+.navbar-light .navbar-custom-brand:hover {
+  color:#26A69A;
+}

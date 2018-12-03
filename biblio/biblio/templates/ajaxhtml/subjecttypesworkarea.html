@@ -1,0 +1,346 @@
+{% load static from staticfiles %}
+
+<div class="modal fade" id="add-subject-type-modal" role="dialog" tabindex="-1">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4>Add subject type item</h4><button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button></div>
+                <div class="modal-body">
+                    <h3>Fill the form below</h3>
+                    <form>
+                        <div class="form-group"><label>Enter name</label><input id="value-type" class="form-control" type="text"></div>
+                        <div class="form-group select-form"><label>Select parent subject type</label><input id="value-subject-type" class="form-control" type="hidden"><span class="name-fields" id="name-subject-type"></span><button class="btn btn-primary" id="select-parent-subject-type-button" type="button">Select</button></div>
+                    </form>
+                </div>
+                <div class="modal-footer"><button class="btn btn-primary" type="button" id="add-subject-type-btn">Add subject type</button></div>
+            </div>
+        </div>
+</div>
+<div class="modal fade" id="select-filter-modal" role="dialog" tabindex="-1">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4>Select value</h4><button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button></div>
+            <div class="modal-body">
+                <h3>Search</h3>
+                <form id="search-fields"></form>
+                <div class="model-table-wrapper">
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr id="table-headings"></tr>
+                            </thead>
+                            <tbody id="table-data"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer"><button id="select-item-button" class="btn btn-primary" type="button">OK</button></div>
+        </div>
+    </div>
+</div>
+<div class="work-area-wrapper">
+    <h1 class="work-area-heading">Manage subject types</h1>
+    <div class="table-wrapper">
+        <div class="add-new-btn-wrapper"><button class="btn btn-light btn-add-new" id="add-new-subject-type-btn" type="button">Add new subject type</button></div>
+        <div class="table-responsive">
+            <table class="table custom-table">
+                <thead class="table-thead">
+                    <tr>
+                        <th>S No.</th>
+                        <th>Type</th>
+                        <th>Subtype of</th>
+                        <th>Delete</th>
+                    </tr>
+                </thead>
+                <tbody id="main-table-items"></tbody>
+            </table>
+        </div>
+    </div>
+</div>
+<script src="{% static 'js/searchfilter.js' %}"></script>
+<script src="{% static 'js/editselectablemodal.js' %}"></script>
+<script type="text/javascript">
+
+  (function() {
+
+    var mainTableData = "";
+
+    $.ajax({
+
+      url: "http://localhost:8000/api/subject_types/",
+
+      type: "GET",
+
+      headers: {
+
+        "Authorization": "Bearer " + getVerifiedAccessKey()
+
+      },
+
+      success: function(table) {
+
+        var serialNumber = 1;
+
+        table.forEach(function(eachRow) {
+
+          mainTableData += "<tr class=\"eachRow-tr\" data-id=\"" + eachRow.id + "\">";
+
+          mainTableData += "<td>" + serialNumber++ + "</td>";
+          mainTableData += "<td data-edit-type=\"parentType\" data-table-edit-type=\"Type\" class=\"table-element-editable\"><div class=\"table-element-value\">" + eachRow.type + "</div></td>";
+          mainTableData += "<td data-id=\"" + eachRow.parent + "\"data-edit-type=\"parentType\" data-update-type=\"name\" data-table-edit-type=\"Parent subject type\" class=\"table-element-selectable\"><div class=\"table-element-value\">" + eachRow.parentType + "</div></td>";
+          mainTableData += "<td><button class=\"btn btn-danger delete-main-table-btn\">Delete</button></td>";
+
+          mainTableData += "</tr>";
+
+        });
+
+        $("#main-table-items").html(mainTableData);
+
+        // $(".edit-main-table-btn").forEach(function(eachButton) {
+        //
+        //   var id = eachButton.attr("data-item-id");
+        //
+        //
+        //
+        // });
+
+        $(document).click(function(e) {
+
+          if (!(($(e.target).attr('class') === "table-element-editable" || $(e.target).attr('class') === "edit-table-element-value" || $(e.target).attr('class') === "table-element-value"))) {
+
+            if ($(".edit-table-element-value").parent().children("div").css('display') === "none") {
+
+              $(".edit-table-element-value").parent().children("div").css('display', 'block');
+
+              $(".edit-table-element-value").each(function(i, eachTextarea) {
+
+                $.ajax({
+
+                  url: "http://localhost:8000/api/subject_types/" + $(eachTextarea).closest('.eachRow-tr').attr("data-id") + "/",
+
+                  method: "PATCH",
+
+                  data: {
+
+                    name: $(eachTextarea).val()
+
+                  },
+
+                  headers: {
+
+                    "Authorization": "Bearer " + getVerifiedAccessKey()
+
+                  },
+
+                  success: function(response) {
+
+                    if (response.success) {
+
+                      $(eachTextarea).parent().children("div").first().html($(eachTextarea).val());
+
+                      $(eachTextarea).remove();
+
+                    }
+
+                  }
+
+                });
+
+              });
+
+            }
+
+          }
+
+          // if(e.currentTarget !=== ){ //check if the current target id or classname is not same as the input box classname
+          //   //processData and remove input box
+          //   //api call
+          // }
+
+        })
+
+        $(".table-element-editable").each(function(index, tableElement) {
+
+          $(this).click(function(event) {
+
+            if ($(this).children("div").css('display') == "block") {
+
+              $(this).children("div").css('display', 'none');
+
+              $(this).html($(this).html() + "<textarea class=\"edit-table-element-value\" style=\"height: 100%; width: 100%;\">" + $(this).children("div").html() + "</textarea>");
+
+            }
+
+          });
+
+        });
+
+        $(".table-element-selectable").each(function(index, tableElement) {
+
+          $(this).click(function(event) {
+
+            var data = undefined;
+
+            var url = undefined;
+
+            switch ($(tableElement).attr("data-edit-type")) {
+
+              case "parentType":
+
+              data = [
+
+                {tableName: "SR No", jsonName: "id"},
+                {tableName: "Type", jsonName: "type"}
+
+              ];
+
+              url = "http://localhost:8000/api/subject_types/"
+
+              break;
+
+              default:
+
+            }
+
+            var searchFilterModal = new SearchFilterModal(
+
+              $(tableElement).attr("data-table-edit-type"),
+
+              url,
+
+              data,
+
+              "",
+
+              $($(this).children("div").get(0)),
+
+              {},
+
+              $(this).attr("data-table-edit-type"),
+
+              "",
+
+            );
+
+            searchFilterModal.generateModal($(tableElement).closest(".eachRow-tr").attr("data-id"), "http://localhost:8000/api/subject_types/");
+
+          });
+
+        });
+
+        $(".delete-main-table-btn").each(function(index, eachDeleteButton) {
+
+          $(eachDeleteButton).click(function() {
+
+            swal({
+              title: 'Are you sure?',
+              text: "Are you sure to delete it?",
+              type: 'warning',
+              showCancelButton: true,
+              confirmButtonColor: '#3085d6',
+              cancelButtonColor: '#d33',
+              confirmButtonText: 'Yes, delete'
+            }).then((result) => {
+              if (result.value) {
+
+                var id = $(eachDeleteButton).closest(".eachRow-tr").attr("data-id");
+
+                $.ajax({
+
+                  url: "http://localhost:8000/api/subject_types/" + id + "/",
+
+                  method: "DELETE",
+
+                  headers: {
+
+                    "Authorization": "Bearer " + getVerifiedAccessKey()
+
+                  },
+
+                  success: function() {
+
+                    $(eachDeleteButton).closest(".eachRow-tr").remove();
+
+                  }
+
+                });
+
+              }
+
+            });
+
+          });
+
+        });
+
+      }
+
+    });
+
+    $("#add-new-subject-type-btn").click(function() {
+
+        $("#add-subject-type-modal").modal().show();
+
+    });
+
+    $("#select-parent-subject-type-button").click(function() {
+
+      modal = new SearchFilterModal("name", "http://localhost:8000/api/subject_types/", [
+
+        {tableName: "SR No.", jsonName: "id"}, {tableName: "Subject type", jsonName: "type"}, {tableName: "Subtype of", jsonName: "parentType"}
+
+      ], $("#value-subject-type"), $("#name-subject-type"), {
+
+        "null": "--"
+
+      }, "type", "id");
+
+      modal.generateModal();
+
+    });
+
+    $("#add-subject-type-btn").click(function() {
+
+      $.ajax({
+
+        url: "http://localhost:8000/api/subject_types/",
+
+        headers: {
+
+          "Authorization": "Bearer " + getVerifiedAccessKey()
+
+        },
+
+        type: "POST",
+
+        data: {
+
+          type: $("#value-type").val(),
+          parent: $("#value-subject-type").val()
+
+        },
+
+        success: function(result) {
+
+          swal({
+            position: 'bottom-end',
+            type: 'success',
+            title: 'Subject type added!',
+            showConfirmButton: false,
+            timer: 1000
+          });
+
+          $(".swal2-container.in").css('display', 'none');
+
+          $("#add-subject-type-modal").modal('hide');
+
+        }
+
+      })
+
+    });
+
+  })();
+
+</script>

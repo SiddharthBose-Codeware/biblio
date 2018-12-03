@@ -17,13 +17,23 @@ class AccountSerializer(serializers.Serializer):
 
         for each in ['firstname', 'lastname', 'libraryname', 'email', 'password']:
 
-            if each not in request.GET:
+            if each not in request.POST:
 
                 return {
 
                     'message': 'Missing info \'' + each + "\'"
 
                 }
+
+        exsistingAccountsWithGivenEmail = Account.objects.filter(email = request.POST['email'])
+
+        if len(exsistingAccountsWithGivenEmail) != 0:
+
+            return {
+
+                'message': 'Account with the email \"' + str(request.POST['email']) + '\" already exsists'
+
+            }
 
         return True
 
@@ -35,13 +45,23 @@ class UserAccountSerializer(AccountSerializer):
 
         for each in ['firstname', 'lastname', 'username', 'email', 'password']:
 
-            if each not in request.GET:
+            if each not in request.POST:
 
                 return {
 
                     'message': 'Missing info \'' + each + "\'"
 
                 }
+
+        exsistingAccountsWithGivenEmail = Account.objects.filter(email = request.POST['email'])
+
+        if len(exsistingAccountsWithGivenEmail) != 0:
+
+            return {
+
+                'message': 'Account with the email \"' + str(request.POST['email']) + '\" already exsists'
+
+            }
 
         return True
 
@@ -74,7 +94,7 @@ class AdminAccountSerializer(AccountSerializer):
 
         for each in ['firstname', 'lastname', 'libraryname', 'email', 'password']:
 
-            if each not in request.GET:
+            if each not in request.POST:
 
                 return {
 
@@ -82,13 +102,13 @@ class AdminAccountSerializer(AccountSerializer):
 
                 }
 
-        accountsWithTheGivenEmail = AdminAccount.objects.filter(email = request.GET['email'])
+        exsistingAccountsWithGivenEmail = Account.objects.filter(email = request.POST['email'])
 
-        if len(accountsWithTheGivenEmail) != 0:
+        if len(exsistingAccountsWithGivenEmail) != 0:
 
             return {
 
-                'message': 'Account with the email already exists.'
+                'message': 'Account with the email \"' + str(request.POST['email']) + '\" already exsists'
 
             }
 
@@ -131,11 +151,23 @@ class AdminAccountSerializer(AccountSerializer):
 
 class LibrarySubjectTypeSerializer(serializers.ModelSerializer):
 
+    parentType = serializers.SerializerMethodField(source = "get_parentType")
+
     class Meta:
 
         model = LibrarySubjectType
 
-        fields = ('itemTypeValue', 'parent', 'id')
+        fields = ('type', 'parent', 'id', 'parentType')
+
+    def get_parentType(self, object):
+
+        if object.parent is not None:
+
+            parent = LibrarySubjectType.objects.filter(pk = object.parent.pk)[0]
+
+            return parent.type
+
+        return None
 
     def create(self, data):
 
@@ -155,17 +187,17 @@ class LibrarySubjectTypeSerializer(serializers.ModelSerializer):
 
         if 'parent' in data:
 
-            return user.library.addSubjectType(itemTypeValue = data['itemTypeValue'], parent = data['parent'])
+            return user.library.addSubjectType(type = data['type'], parent = data['parent'])
 
         else:
 
-            return user.library.addSubjectType(itemTypeValue = data['itemTypeValue'], isRoot = True)
+            return user.library.addSubjectType(type = data['type'], isRoot = True)
 
     def partial_update(self, instance, validated_data):
 
-        if 'itemTypeValue' in validated_data:
+        if 'type' in validated_data:
 
-            instance.itemTypeValue = validated_data['itemTypeValue']
+            instance.type = validated_data['type']
 
         if 'parent' in validated_data:
 
@@ -201,6 +233,8 @@ class LibraryAuthorSerializer(serializers.ModelSerializer):
         return user.library.addAuthor(authorName = data['name'])
 
     def partial_update(self, instance, validated_data):
+
+        print(validated_data)
 
         if 'name' in validated_data:
 
@@ -246,7 +280,7 @@ class LibraryItemTypeSerializer(serializers.ModelSerializer):
 
         if 'type' in validated_data:
 
-            instance.name = validated_data['type']
+            instance.type = validated_data['type']
 
         instance.save()
 
@@ -292,15 +326,45 @@ class LibraryBookItemTypeSerializer(LibraryItemTypeSerializer):
 
 class LibraryItemSerializer(serializers.ModelSerializer):
 
+    authorName = serializers.SerializerMethodField(source = 'get_authorName')
+
+    itemTypeName = serializers.SerializerMethodField(source = 'get_itemTypeName')
+
+    subjectTypeName = serializers.SerializerMethodField(source = 'get_subjectTypeName')
+
     class Meta:
 
         model = LibraryItem
 
-        fields = ('name', 'author', 'itemType', 'subjectType')
+        fields = ('id', 'name', 'author', 'itemType', 'subjectType', 'authorName', 'itemTypeName', 'subjectTypeName')
 
-    def get_queryset(self):
+    def get_authorName(self, object):
 
-        return self.request.user.library.items.get_queryset()
+        if object.author is not None:
+
+            author = LibraryAuthor.objects.filter(pk = object.author.pk)[0]
+
+            return author.name
+
+        return None
+
+    def get_itemTypeName(self, object):
+
+        if object.itemType is not None:
+
+            itemType = LibraryItemType.objects.filter(pk = object.itemType.pk)[0]
+
+            return itemType.type
+
+        return None
+
+    def get_subjectTypeName(self, object):
+
+        if object.subjectType is not None:
+
+            subjectType = LibrarySubjectType.objects.filter(pk = object.subjectType.pk)[0]
+
+            return subjectType.type
 
     def create(self, data):
 
@@ -328,15 +392,15 @@ class LibraryItemSerializer(serializers.ModelSerializer):
 
         if 'author' in validated_data:
 
-            instance.name = validated_data['author']
+            instance.author = Author.objects.filter(pk = validated_data['author'])[0]
 
         if 'itemType' in validated_data:
 
-            instance.name = validated_data['itemType']
+            instance.itemType = LibraryItemType.objects.filter(pk = validated_data['itemType'])[0]
 
         if 'subjectType' in validated_data:
 
-            instance.name = validated_data['subjectType']
+            instance.subjectType = LibrarySubjectType.objects.filter(pk = validated_data['subjectType'])[0]
 
         instance.save()
 
@@ -366,14 +430,56 @@ class LibraryBookItemSerializer(LibraryItemSerializer):
 
 class LibraryItemIssueSerializer(serializers.ModelSerializer):
 
+    issuedToUserName = serializers.SerializerMethodField(source = "get_issuedToUserName")
+
+    itemName = serializers.SerializerMethodField(source = "get_itemName")
+
     class Meta:
 
         model = LibraryItemIssue
 
-        fields = '__all__'
+        fields = ('issuedAt', 'issuedToUserName', 'itemName', 'issuedToUser', 'item', 'returnDate',)
+
+    def get_issuedToUserName(self, object):
+
+        return object.issuedToUser.username
+
+    def get_itemName(self, object):
+
+        return object.item.name
 
     def create(self, data):
 
         user = self.context.get("request").user
 
         return user.library.addLibraryItemIssue(data = data)
+
+class LibrarySerializer(serializers.ModelSerializer):
+
+    class Meta:
+
+        model = Library
+
+        isUserPresent = serializers.SerializerMethodField(source = 'get_isUserPresent')
+
+        fields = ('name', 'isUserPresent')
+
+    def get_isUserPresent(self, object):
+
+        if object in self.request.user.library_set():
+
+            return True
+
+        return False
+
+class UserAccountModelSerializer(serializers.ModelSerializer):
+
+    model = UserAccount
+
+    fields = '__all__'
+
+    def get_queryset():
+
+        def get_queryset(request):
+
+            return request.user.library.users

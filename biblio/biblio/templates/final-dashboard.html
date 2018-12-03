@@ -1,0 +1,104 @@
+{% load static from staticfiles %}
+
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - Biblio</title>
+    <link rel="stylesheet" href="{% static 'bootstrap/css/bootstrap.min.css' %}">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lato:400,700,400italic">
+    <link rel="stylesheet" href="{% static 'fonts/font-awesome.min.css' %}">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Comfortaa|Kodchasan|Nunito+Sans|Rubik">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Cookie">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:400,300,600,700">
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+    <link rel="stylesheet" href="{% static 'css/Pretty-Header.css' %}">
+    <link rel="stylesheet" href="{% static 'css/Hero-Technology.css' %}">
+    <link rel="stylesheet" href="{% static 'css/Mockup-MacBook-Pro.css' %}">
+    <link rel="stylesheet" href="{% static 'css/Pretty-Registration-Form.css' %}">
+    <link rel="stylesheet" href="{% static 'css/Pretty-Footer.css' %}">
+    <link rel="stylesheet" href="{% static 'css/Pretty-Header-1.css' %}">
+    <link rel="stylesheet" href="{% static 'css/Data-Table.css' %}">
+    <link rel="stylesheet" href="{% static 'css/Data-Table2.css' %}">
+    <link rel="stylesheet" href="{% static 'css/Highlight-Clean.css' %}">
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.10.15/css/dataTables.bootstrap.min.css">
+    <link rel="stylesheet" href="{% static 'css/Login-Form-Clean.css' %}">
+    <link rel="stylesheet" href="{% static 'css/Sidebar-Menu.css' %}">
+    <link rel="stylesheet" href="{% static 'css/Sidebar-Menu1.css' %}">
+</head>
+
+<body>
+    <nav class="navbar navbar-light navbar-expand-md custom-header">
+        <div class="container-fluid"><a class="navbar-brand navbar-custom-brand" href="#">biblio Admin Dashboard</a><button class="navbar-toggler" data-toggle="collapse" data-target="#navbar-collapse" id="menu-toggle"><span class="sr-only">Toggle navigation</span><span class="navbar-toggler-icon"></span></button>
+            <div
+                class="collapse navbar-collapse" id="navbar-collapse">
+                <ul class="nav navbar-nav links"></ul>
+                <ul class="nav navbar-nav ml-auto">
+                    <!--<li class="dropdown"><a class="dropdown-toggle nav-link" data-toggle="dropdown" aria-expanded="false" href="#"> <img src="assets/img/avatar.jpg" class="dropdown-image"></a>
+                        <div class="dropdown-menu dropdown-menu-right" role="menu"><a class="dropdown-item" role="presentation" href="#" style="color:rgb(0, 0, 0);font-family:Comfortaa, cursive;">Log out </a></div>
+                    </li>-->
+                </ul>
+        </div>
+        </div>
+    </nav>
+    <div style="height:100%;">
+        <div class="container" style="width:100%;height:100%;font-family:'Nunito Sans';display:contents;">
+            <div class="row" style="height:100%;">
+                <div class="col-md-4 custom-sidebar-wrapper" style="padding:0;height:100%;">
+                    <div id="options-sidebar" class="custom-sidebar">
+                        <div class="sidebar-heading" style="padding:20px">
+                            <h1 id="library-name-heading" style="word-break: break-word"></h1>
+                        </div>
+                        <div class="sidebar-content-wrapper">
+                            <div class="sidebar-content" style="margin-left:10px"><a href="#" class="custom-sidebar-link" id="manage-library-items-sidebar-link">Manage library items</a><a href="#" class="custom-sidebar-link" id="manage-subject-types-sidebar-link">Manage subject types</a><a href="#" class="custom-sidebar-link" id="manage-item-types-sidebar-link">Manage item types</a>
+                              <a href="#" class="custom-sidebar-link" id="manage-authors-sidebar-link">Manage authors</a>
+                                <a href="#" class="custom-sidebar-link" id="issue-item-sidebar-link">Issue Item</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-8" style="padding:0;height:100%;">
+                    <div class="work-area-container" id="work-area-container"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="loader-wrapper" id="loader-wrapper">
+        <div class="loader-spinner"><i class="fa fa-rotate-right spinner-icon"></i></div>
+    </div>
+    <script src="{% static 'js/jquery.min.js' %}"></script>
+    <script src="{% static 'bootstrap/js/bootstrap.min.js' %}"></script>
+    <script src="https://cdn.datatables.net/1.10.15/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.10.15/js/dataTables.bootstrap.min.js"></script>
+    <script src="{% static 'js/Sidebar-Menu.js' %}"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/limonte-sweetalert2/7.28.11/sweetalert2.all.js"></script>
+    <script src="{% static 'js/verification.js' %}"></script>
+    <script src="{% static 'js/final-dashboard.js' %}"></script>
+
+    <script type="text/javascript">
+
+      $.ajax({
+
+        url: "http://localhost:8000/api/get_library_name",
+
+        method: "GET",
+
+        headers: {
+
+          "Authorization": "Bearer " + getVerifiedAccessKey()
+
+        },
+
+        success: function(response) {
+
+          $("#library-name-heading").html(response.libraryName);
+
+        }
+
+      });
+
+    </script>
+</body>
+</html>

@@ -1,0 +1,322 @@
+{% load static from staticfiles %}
+
+<div class="modal fade" id="add-issue-modal" role="dialog" tabindex="-1">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4>Issue item</h4><button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button></div>
+                <div class="modal-body">
+                    <h3>Fill the form below</h3>
+                    <form>
+                        <div class="form-group select-form"><label>Select user</label><input id="value-user" class="form-control" type="hidden"><span class="name-fields" id="name-user"></span><button class="btn btn-primary" id="select-user-button" type="button">Select</button></div>
+                        <div class="form-group select-form"><label>Select item</label><input id="value-item" class="form-control" type="hidden"><span class="name-fields" id="name-item"></span><button class="btn btn-primary" id="select-item" type="button">Select</button></div>
+                        <div class="form-group select-form"><label>Enter date</label><input id="value-date" class="form-control" type="hidden"><span class="name-fields" id="name-date"></span><input type="date" id="select-issue-date-input"></input>
+                    </form>
+                </div>
+                <div class="modal-footer"><button class="btn btn-primary" type="button" id="add-issue-btn">Issue</button></div>
+            </div>
+        </div>
+</div>
+</div>
+<div class="modal fade" id="select-filter-modal" role="dialog" tabindex="-1">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4>Select</h4><button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button></div>
+            <div class="modal-body">
+                <h3>Search</h3>
+                <form id="search-fields"></form>
+                <div class="model-table-wrapper">
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr id="table-headings"></tr>
+                            </thead>
+                            <tbody id="table-data"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer"><button id="select-item-button" class="btn btn-primary" type="button">OK</button></div>
+        </div>
+    </div>
+</div>
+<div class="work-area-wrapper">
+    <h1 class="work-area-heading">Manage Issues</h1>
+    <div class="table-wrapper">
+        <div class="add-new-btn-wrapper"><button class="btn btn-light btn-add-new" id="add-new-issue-btn" type="button">Add new issue</button></div>
+        <div class="table-responsive">
+            <table class="table custom-table">
+                <thead class="table-thead">
+                    <tr>
+                        <th>S No.</th>
+                        <th>Name</th>
+                        <th>Item name</th>
+                        <th>Date</th>
+                        <th>Delete</th>
+                    </tr>
+                </thead>
+                <tbody id="main-table-items"></tbody>
+            </table>
+        </div>
+    </div>
+</div>
+<script src="{% static 'js/searchfilter.js' %}"></script>
+<script src="{% static 'js/editselectablemodal.js' %}"></script>
+<script type="text/javascript">
+
+  (function() {
+
+    var mainTableData = "";
+
+    $.ajax({
+
+      url: "http://localhost:8000/api/item_issues/",
+
+      type: "GET",
+
+      headers: {
+
+        "Authorization": "Bearer " + getVerifiedAccessKey()
+
+      },
+
+      success: function(table) {
+
+        console.log(table);
+
+        var serialNumber = 1;
+
+        table.forEach(function(eachRow) {
+
+          mainTableData += "<tr class=\"eachRow-tr\" data-id=\"" + eachRow.id + "\">";
+
+          mainTableData += "<td>" + serialNumber++ + "</td>";
+          mainTableData += "<td data-id=\"" + eachRow.issuedToUser + " class=\"table-element-selectable\"><div class=\"table-element-value\">" + eachRow.issuedToUserName + "</div></td>";
+          mainTableData += "<td data-id=\"" + eachRow.item + "\" class=\"table-element-selectable\"><div class=\"table-element-value\">" + eachRow.itemName + "</div></td>";
+          mainTableData += "<td class=\"table-element-selectable\"><div class=\"table-element-value\">" + eachRow.returnDate + "</div></td>";
+          mainTableData += "<td><button class=\"btn btn-danger delete-main-table-btn\">Delete</button></td>";
+
+          mainTableData += "</tr>";
+
+        });
+
+        $("#main-table-items").html(mainTableData);
+
+        // $(".edit-main-table-btn").forEach(function(eachButton) {
+        //
+        //   var id = eachButton.attr("data-item-id");
+        //
+        //
+        //
+        // });
+
+        $(".table-element-selectable").each(function(index, tableElement) {
+
+          $(this).click(function(event) {
+
+            var data = undefined;
+
+            var url = undefined;
+
+            switch ($(tableElement).attr("data-edit-type")) {
+
+              case "author":
+
+              data = [
+
+                {tableName: "SR No", jsonName: "id"},
+                {tableName: "Name", jsonName: "name"}
+
+              ];
+
+              url = "http://localhost:8000/api/authors/";
+
+              break;
+
+              case "subjectType":
+
+              data = [
+
+                {tableName: "SR No", jsonName: "id"},
+                {tableName: "Type", jsonName: "type"}
+
+              ];
+
+              url = "http://localhost:8000/api/subject_types/"
+
+              break;
+
+              case "itemType":
+
+              data = [
+
+                {tableName: "SR No", jsonName: "id"},
+                {tableName: "Type", jsonName: "type"}
+
+              ]
+
+              url = "http://localhost:8000/api/item_types/"
+
+              break;
+
+              default:
+
+            }
+
+            var searchFilterModal = new SearchFilterModal(
+
+              $(tableElement).attr("data-table-edit-type"),
+
+              url,
+
+              data,
+
+              "",
+
+              $($(this).children("div").get(0)),
+
+              {},
+
+              $(this).attr("data-table-edit-type"),
+
+              "",
+
+            );
+
+            searchFilterModal.generateModal($(tableElement).closest(".eachRow-tr").attr("data-id"), "http://localhost:8000/api/items/");
+
+          });
+
+        });
+
+        $(".delete-main-table-btn").each(function(index, eachDeleteButton) {
+
+          $(eachDeleteButton).click(function() {
+
+            swal({
+              title: 'Are you sure?',
+              text: "Are you sure to delete it?",
+              type: 'warning',
+              showCancelButton: true,
+              confirmButtonColor: '#3085d6',
+              cancelButtonColor: '#d33',
+              confirmButtonText: 'Yes, delete'
+            }).then((result) => {
+              if (result.value) {
+
+                var id = $(eachDeleteButton).closest(".eachRow-tr").attr("data-id");
+
+                $.ajax({
+
+                  url: "http://localhost:8000/api/items/" + id + "/",
+
+                  method: "DELETE",
+
+                  headers: {
+
+                    "Authorization": "Bearer " + getVerifiedAccessKey()
+
+                  },
+
+                  success: function() {
+
+                    $(eachDeleteButton).closest(".eachRow-tr").remove();
+
+                  }
+
+                });
+
+              }
+
+            });
+
+          });
+
+        });
+
+      }
+
+    });
+
+    $("#add-new-issue-btn").click(function() {
+
+        $("#add-issue-modal").modal().show();
+
+    });
+
+    $("#select-user-button").click(function() {
+
+      modal = new SearchFilterModal("name", "http://localhost:8000/api/get_library_members/", [
+
+        {tableName: "SR No.", jsonName: "id"}, {tableName: "Username", jsonName: "username"}
+
+      ], $("#value-user"), $("#name-user"), {
+
+        "null": "--"
+
+      }, "type", "id");
+
+      modal.generateModal();
+
+    });
+
+    $("#select-item").click(function() {
+
+      modal = new SearchFilterModal("item type", "http://localhost:8000/api/items/", [
+
+        {tableName: "SR No.", jsonName: "id"}, {tableName: "Item name", jsonName: "name"}
+
+      ], $("#value-item"), $("#name-item"), {"null": "Book"}, "type", "id");
+
+      modal.generateModal();
+
+    });
+
+    $("#add-library-item-btn").click(function() {
+
+      var token = "";
+
+      $.ajax({
+
+        url: "http://localhost:8000/api/item_issues/",
+
+        headers: {
+
+          "Authorization": "Bearer " + getVerifiedAccessKey()
+
+        },
+
+        type: "POST",
+
+        // data: {
+        //
+        //   : $("#value-name").val(),
+        //   : $("#value-item").val(),
+        //   subjectType: $("#value-user").val(),
+        //
+        // },
+
+        success: function(result) {
+
+          swal({
+            position: 'bottom-end',
+            type: 'success',
+            title: 'Item added!',
+            showConfirmButton: false,
+            timer: 1000
+          });
+
+          $(".swal2-container.in").css('display', 'none');
+
+          $("#add-issue-modal").modal('hide');
+
+        }
+
+      })
+
+    });
+
+  })();
+
+</script>

@@ -1,0 +1,13 @@
+.content {
+  padding: 0 50px;
+}
+.each-notification {
+  background-color: #FFF;
+  border: 1px solid #000000;
+  border-bottom: none;
+  padding: 10px 20px;
+  display: flex;
+}
+.membership-button {
+  float: right;
+}

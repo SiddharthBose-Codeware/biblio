@@ -11,8 +11,6 @@ class UserManager(AccountManager):
 
     def create_user(self, email, username, firstname, lastname, password):
 
-        help(self.model)
-
         user = self.model(
 
             email = self.normalize_email(email),

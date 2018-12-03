@@ -6,13 +6,12 @@ from django.http import JsonResponse
 from api.serializers import *
 from api.modelfunctions import *
 from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework import filters
 
 import json
 import urllib
 
 class CreateUserAccountAPIView(APIView):
-
-    permission_classes = (AllowAny,)
 
     def post(self, request):
 
@@ -29,11 +28,11 @@ class CreateUserAccountAPIView(APIView):
 
         userAccountSerializer = UserAccountSerializer(data = {
 
-            'firstname': request.GET['firstname'],
-            'lastname': request.GET['lastname'],
-            'username': request.GET['username'],
-            'email': request.GET['email'],
-            'password': request.GET['password']
+            'firstname': request.POST['firstname'],
+            'lastname': request.POST['lastname'],
+            'username': request.POST['username'],
+            'email': request.POST['email'],
+            'password': request.POST['password']
 
         })
 
@@ -63,8 +62,6 @@ class CreateAdminAccountAPIView(APIView):
 
         permission_classes = (AllowAny,)
 
-        print("\n\n\n\n\n\n\n\n\n\n\n\nSomething\n\n\n\n\n\n\n\n")
-
         validationResult = AdminAccountSerializer.validateRequest(request)
 
         if validationResult != True:
@@ -78,11 +75,11 @@ class CreateAdminAccountAPIView(APIView):
 
         adminAccountSerializer = AdminAccountSerializer(data = {
 
-            'firstname': request.GET['firstname'],
-            'lastname': request.GET['lastname'],
-            'libraryname': request.GET['libraryname'],
-            'email': request.GET['email'],
-            'password': request.GET['password']
+            'firstname': request.POST['firstname'],
+            'lastname': request.POST['lastname'],
+            'libraryname': request.POST['libraryname'],
+            'email': request.POST['email'],
+            'password': request.POST['password']
 
         })
 
@@ -177,9 +174,9 @@ class LoginUserAPIView(LoginAPIView):
 
         return self.login({
 
-            'email': request.GET['email'],
-            'password': request.GET['password'],
-            'rememberMe': request.GET['rememberMe']
+            'email': request.POST['email'],
+            'password': request.POST['password'],
+            'rememberMe': request.POST['rememberMe']
 
         }, False)
 
@@ -189,9 +186,9 @@ class LoginAdminAPIView(LoginAPIView):
 
         return self.login({
 
-            'email': request.GET['email'],
-            'password': request.GET['password'],
-            'rememberMe': request.GET['rememberMe']
+            'email': request.POST['email'],
+            'password': request.POST['password'],
+            'rememberMe': request.POST['rememberMe']
 
         }, True)
 
@@ -201,11 +198,11 @@ class UpdateAccountAPIView(APIView):
 
     def post(self, request):
 
-        # toChange = request.GET['toChange']
+        # toChange = request.POST['toChange']
         #
-        # newValue = request.GET['newValue']
+        # newValue = request.POST['newValue']
 
-        request.user.update(request.GET)
+        request.user.update(request.POST)
 
         return JsonResponse({
 
@@ -220,6 +217,10 @@ class LibrarySubjectTypeView(viewsets.ModelViewSet):
 
     serializer_class = LibrarySubjectTypeSerializer
 
+    filter_backends = (filters.SearchFilter,)
+
+    search_fields = ('type', 'parent__type')
+
     def get_queryset(self):
 
         # data = self.request.user.library.subjectTypes
@@ -230,18 +231,18 @@ class LibrarySubjectTypeView(viewsets.ModelViewSet):
         #
         # return Response(serializer.data)
 
-        return self.request.user.library.subjectTypes.get_queryset()
+        return self.request.user.library.subjectTypes.get_queryset().order_by('-id')
 
     def create(self, request, *args, **kwargs):
 
-        # request.user.library.addSubjectType(request.GET['itemTypeValue'], request.GET['parent'])
+        # request.user.library.addSubjectType(request.POST['type'], request.POST['parent'])
 
-        if 'parent' in request.GET:
+        if 'parent' in request.POST:
 
             subjectTypeSerializer = self.get_serializer(data = {
 
-                'itemTypeValue': request.GET['itemTypeValue'],
-                'parent':  request.GET['parent']
+                'type': request.POST['type'],
+                'parent':  request.POST['parent']
 
             })
 
@@ -249,7 +250,7 @@ class LibrarySubjectTypeView(viewsets.ModelViewSet):
 
             subjectTypeSerializer = self.get_serializer(data = {
 
-                'itemTypeValue': request.GET['itemTypeValue']
+                'type': request.POST['type']
 
             })
 
@@ -260,7 +261,7 @@ class LibrarySubjectTypeView(viewsets.ModelViewSet):
 
             return JsonResponse({
 
-                'status': True,
+                'success': True,
                 'message': "Created a new subject type.",
                 'id': object.pk
 
@@ -270,7 +271,7 @@ class LibrarySubjectTypeView(viewsets.ModelViewSet):
 
                 return JsonResponse({
 
-                    'status': False,
+                    'success': False,
                     'message': subjectTypeSerializer.errors
 
                 })
@@ -281,16 +282,16 @@ class LibrarySubjectTypeView(viewsets.ModelViewSet):
 
         updationData = {
 
-            'itemTypeValue': object.itemTypeValue,
+            'type': object.type,
             'parent': object.parent
 
         }
 
-        updatedObject = self.get_serializer(data = updationData).partial_update(object, request.GET)
+        updatedObject = self.get_serializer(data = updationData).partial_update(object, request.POST)
 
         return JsonResponse({
 
-            'status': True,
+            'success': True,
             'newObjectData': updationData
 
         })
@@ -303,7 +304,7 @@ class LibrarySubjectTypeView(viewsets.ModelViewSet):
 
         return JsonResponse({
 
-            'status': True,
+            'success': True,
             'message': "The subject type has been deleted."
 
         })
@@ -312,7 +313,7 @@ class LibrarySubjectTypeView(viewsets.ModelViewSet):
     #
     #     help(self)
     #
-    #     serializer.save(data = self.request.GET)
+    #     serializer.save(data = self.request.POST)
 
 class LibraryAuthorView(viewsets.ModelViewSet):
 
@@ -330,13 +331,13 @@ class LibraryAuthorView(viewsets.ModelViewSet):
         #
         # return Response(serializer.data)
 
-        return self.request.user.library.authors.get_queryset()
+        return self.request.user.library.authors.get_queryset().order_by('-id')
 
     def create(self, request, *args, **kwargs):
 
         authorSerializer = self.get_serializer(data = {
 
-            'name': request.GET['name']
+            'name': request.POST['name']
 
         })
 
@@ -346,7 +347,7 @@ class LibraryAuthorView(viewsets.ModelViewSet):
 
             return JsonResponse({
 
-                'status': True,
+                'success': True,
                 'message': "Author added to library.",
                 'id': object.pk
 
@@ -356,7 +357,7 @@ class LibraryAuthorView(viewsets.ModelViewSet):
 
                 return JsonResponse({
 
-                    'status': False,
+                    'success': False,
                     'message': subjectTypeSerializer.errors
 
                 })
@@ -371,11 +372,11 @@ class LibraryAuthorView(viewsets.ModelViewSet):
 
         }
 
-        updatedObject = self.get_serializer(data = updationData).partial_update(object, request.GET)
+        updatedObject = self.get_serializer(data = updationData).partial_update(object, request.POST)
 
         return JsonResponse({
 
-            'status': True,
+            'success': True,
             'newObjectData': updationData
 
         })
@@ -388,7 +389,7 @@ class LibraryAuthorView(viewsets.ModelViewSet):
 
         return JsonResponse({
 
-            'status': True,
+            'success': True,
             'message': "The author has been deleted."
 
         })
@@ -398,6 +399,10 @@ class LibraryItemTypeView(viewsets.ModelViewSet):
     permission_classes = (IsAuthenticated,)
 
     serializer_class = LibraryItemTypeSerializer
+
+    filter_backends = (filters.SearchFilter,)
+
+    search_fields = ('type',)
 
     def get_queryset(self):
 
@@ -409,7 +414,7 @@ class LibraryItemTypeView(viewsets.ModelViewSet):
         #
         # return Response(serializer.data)
 
-        return self.request.user.library.itemTypes.get_queryset()
+        return self.request.user.library.itemTypes.get_queryset().order_by('-id')
 
     def createItemType(self, itemTypeSerializer):
 
@@ -419,7 +424,7 @@ class LibraryItemTypeView(viewsets.ModelViewSet):
 
             return JsonResponse({
 
-                'status': True,
+                'success': True,
                 'message': "Item type added to library.",
                 'id': object.pk
 
@@ -429,7 +434,7 @@ class LibraryItemTypeView(viewsets.ModelViewSet):
 
                 return JsonResponse({
 
-                    'status': False,
+                    'success': False,
                     'message': subjectTypeSerializer.errors
 
                 })
@@ -438,7 +443,7 @@ class LibraryItemTypeView(viewsets.ModelViewSet):
 
         itemTypeSerializer = self.get_serializer(data = {
 
-            'type': request.GET['type']
+            'type': request.POST['type']
 
         })
 
@@ -454,11 +459,11 @@ class LibraryItemTypeView(viewsets.ModelViewSet):
 
         }
 
-        updatedObject = self.get_serializer(data = updationData).partial_update(object, request.GET)
+        updatedObject = self.get_serializer(data = updationData).partial_update(object, request.POST)
 
         return JsonResponse({
 
-            'status': True,
+            'success': True,
             'newObjectData': updationData
 
         })
@@ -471,7 +476,7 @@ class LibraryItemTypeView(viewsets.ModelViewSet):
 
         return JsonResponse({
 
-            'status': True,
+            'success': True,
             'message': "The item type has been deleted."
 
         })
@@ -508,16 +513,16 @@ class LibraryItemView(viewsets.ModelViewSet):
         #
         # return Response(serializer.data)
 
-        return self.request.user.library.items.get_queryset()
+        return self.request.user.library.items.get_queryset().order_by('-id')
 
     def create(self, request, *args, **kwargs):
 
         itemSerializer = self.get_serializer(data = {
 
-            'name': request.GET['name'],
-            'author': request.GET['author'],
-            'itemType': request.GET['itemType'],
-            'subjectType': request.GET['subjectType']
+            'name': request.POST['name'],
+            'author': request.POST['author'],
+            'itemType': request.POST['itemType'],
+            'subjectType': request.POST['subjectType']
 
         })
 
@@ -527,7 +532,7 @@ class LibraryItemView(viewsets.ModelViewSet):
 
             return JsonResponse({
 
-                'status': True,
+                'success': True,
                 'message': "Item added to library.",
                 'id': object.pk
 
@@ -537,7 +542,7 @@ class LibraryItemView(viewsets.ModelViewSet):
 
                 return JsonResponse({
 
-                    'status': False,
+                    'success': False,
                     'message': itemSerializer.errors
 
                 })
@@ -548,15 +553,20 @@ class LibraryItemView(viewsets.ModelViewSet):
 
         updationData = {
 
-            'name': object.name
+            'name': object.name,
+            'subjectType': object.subjectType.pk,
+            'itemType': object.itemType.pk,
+            'author': object.author.pk
 
         }
 
-        updatedObject = self.get_serializer(data = updationData).partial_update(object, request.GET)
+        print("\n\n\n\n" + str(updationData) + "\n\n\n\n")
+
+        updatedObject = self.get_serializer(data = updationData).partial_update(object, request.POST)
 
         return JsonResponse({
 
-            'status': True,
+            'success': True,
             'newObjectData': updationData
 
         })
@@ -569,145 +579,153 @@ class LibraryItemView(viewsets.ModelViewSet):
 
         return JsonResponse({
 
-            'status': True,
+            'success': True,
             'message': "The item has been deleted."
 
         })
 
-class LibraryItemView(viewsets.ModelViewSet):
-
-    permission_classes = (IsAuthenticated,)
-
-    serializer_class = LibraryItemSerializer
-
-    def get_queryset(self):
-
-        # data = self.request.user.library.subjectTypes
-        #
-        # help(data)
-        #
-        # serializer = LibrarySubjectTypeSerializer(data, many = True)
-        #
-        # return Response(serializer.data)
-
-        return self.request.user.library.items.get_queryset()
-
-    def get_serializer_class(self):
-
-        if self.request.GET['itemType'] is None:
-
-            return LibraryBookItemSerializer
-
-        return LibraryItemSerializer
-
-    # def getLibraryItemSerializer(self, data):
-    #
-    #     if data['itemType'] is None:
-    #
-    #         return self.get_serializer_class(data = {
-    #
-    #             'name': data['name'],
-    #             'author': data['author'],
-    #             'itemType': data['itemType'],
-    #             'subjectType': data['subjectType'],
-    #             'ISBNCode': data['ISBNCode']
-    #
-    #         })
-    #
-    #     itemSerializer = self.get_serializer_class(data = {
-    #
-    #         'name': data['name'],
-    #         'author': data['author'],
-    #         'itemType': data['itemType'],
-    #         'subjectType': data['subjectType']
-    #
-    #     })
-
-    def createItem(self, itemSerializer):
-
-        if itemSerializer.is_valid():
-
-            object = itemSerializer.save()
-
-            return JsonResponse({
-
-                'status': True,
-                'message': "Item added to library.",
-                'id': object.pk
-
-            })
-
-        else:
-
-                return JsonResponse({
-
-                    'status': False,
-                    'message': itemSerializer.errors
-
-                })
-
-    def create(self, request, *args, **kwargs):
-
-        itemSerializer = None
-
-        if request.GET['itemType'] is None:
-
-            itemSerializer = self.get_serializer(data = {
-
-                'name': request.GET['name'],
-                'author': request.GET['author'],
-                'itemType': request.GET['itemType'],
-                'subjectType': request.GET['subjectType'],
-                'ISBNCode': request.GET['ISBNCode']
-
-            })
-
-        else:
-
-            itemSerializer = self.get_serializer(data = {
-
-                'name': request.GET['name'],
-                'author': request.GET['author'],
-                'itemType': request.GET['itemType'],
-                'subjectType': request.GET['subjectType']
-
-            })
-
-        # help(itemSerializer)
-
-        return self.createItem(itemSerializer)
-
-    def partial_update(self, request, *args, **kwargs):
-
-        object = LibraryItem.objects.filter(pk = kwargs['pk'])[0]
-
-        updationData = {
-
-            'name': object.name
-
-        }
-
-        updatedObject = self.get_serializer(data = updationData).partial_update(object, request.GET)
-
-        return JsonResponse({
-
-            'status': True,
-            'newObjectData': updationData
-
-        })
-
-    def destroy(self, request, *args, **kwargs):
-
-        object = LibraryItem.objects.filter(pk = kwargs['pk'])[0]
-
-        object.delete();
-
-        return JsonResponse({
-
-            'status': True,
-            'message': "The item has been deleted."
-
-        })
+# class LibraryItemView(viewsets.ModelViewSet):
+#
+#     permission_classes = (IsAuthenticated,)
+#
+#     serializer_class = LibraryItemSerializer
+#
+#     def get_queryset(self):
+#
+#         # data = self.request.user.library.subjectTypes
+#         #
+#         # help(data)
+#         #
+#         # serializer = LibrarySubjectTypeSerializer(data, many = True)
+#         #
+#         # return Response(serializer.data)
+#
+#         return self.request.user.library.items.get_queryset().order_by('-id').order_by('-id')
+#
+#     def get_serializer_class(self):
+#
+#         if self.request.method == "POST":
+#
+#             if self.request.POST['itemType'] is None:
+#
+#                 return LibraryBookItemSerializer
+#
+#         return LibraryItemSerializer
+#
+#     # def getLibraryItemSerializer(self, data):
+#     #
+#     #     if data['itemType'] is None:
+#     #
+#     #         return self.get_serializer_class(data = {
+#     #
+#     #             'name': data['name'],
+#     #             'author': data['author'],
+#     #             'itemType': data['itemType'],
+#     #             'subjectType': data['subjectType'],
+#     #             'ISBNCode': data['ISBNCode']
+#     #
+#     #         })
+#     #
+#     #     itemSerializer = self.get_serializer_class(data = {
+#     #
+#     #         'name': data['name'],
+#     #         'author': data['author'],
+#     #         'itemType': data['itemType'],
+#     #         'subjectType': data['subjectType']
+#     #
+#     #     })
+#
+#     def createItem(self, itemSerializer):
+#
+#         if itemSerializer.is_valid():
+#
+#             object = itemSerializer.save()
+#
+#             return JsonResponse({
+#
+#                 'success': True,
+#                 'message': "Item added to library.",
+#                 'id': object.pk
+#
+#             })
+#
+#         else:
+#
+#                 return JsonResponse({
+#
+#                     'success': False,
+#                     'message': itemSerializer.errors
+#
+#                 })
+#
+#     def create(self, request, *args, **kwargs):
+#
+#         itemSerializer = None
+#
+#         if request.POST['itemType'] is None:
+#
+#             itemSerializer = self.get_serializer(data = {
+#
+#                 'name': request.POST['name'],
+#                 'author': request.POST['author'],
+#                 'itemType': request.POST['itemType'],
+#                 'subjectType': request.POST['subjectType'],
+#                 'ISBNCode': request.POST['ISBNCode']
+#
+#             })
+#
+#         else:
+#
+#             itemSerializer = self.get_serializer(data = {
+#
+#                 'name': request.POST['name'],
+#                 'author': request.POST['author'],
+#                 'itemType': request.POST['itemType'],
+#                 'subjectType': request.POST['subjectType']
+#
+#             })
+#
+#         # help(itemSerializer)
+#
+#         return self.createItem(itemSerializer)
+#
+#     def partial_update(self, request, *args, **kwargs):
+#
+#         object = LibraryItem.objects.filter(pk = kwargs['pk'])[0]
+#
+#         updationData = {
+#
+#             'name': object.name,
+#             'subjectType': object.itemType,
+#             'itemType': object.itemType,
+#             'type': object.itemType,
+#             'author': object.author
+#
+#         }
+#
+#         print(updationData)
+#
+#         updatedObject = self.get_serializer(data = updationData).partial_update(object, request.POST)
+#
+#         return JsonResponse({
+#
+#             'success': True,
+#             'newObjectData': updationData
+#
+#         })
+#
+#     def destroy(self, request, *args, **kwargs):
+#
+#         object = LibraryItem.objects.filter(pk = kwargs['pk'])[0]
+#
+#         object.delete();
+#
+#         return JsonResponse({
+#
+#             'success': True,
+#             'message': "The item has been deleted."
+#
+#         })
 
 class LibraryBookItemView(LibraryItemView):
 
@@ -721,11 +739,11 @@ class LibraryBookItemView(LibraryItemView):
 
         bookItemSerializer = self.get_serializer(data = {
 
-            'name': request.GET['name'],
-            'author': request.GET['author'],
-            'itemType': request.GET['itemType'],
-            'subjectType': request.GET['subjectType'],
-            'ISBNCode': request.GET['ISBNCode']
+            'name': request.POST['name'],
+            'author': request.POST['author'],
+            'itemType': request.POST['itemType'],
+            'subjectType': request.POST['subjectType'],
+            'ISBNCode': request.POST['ISBNCode']
 
         })
 
@@ -738,7 +756,7 @@ class LibraryItemIssueView(viewsets.ModelViewSet):
 
     def get_queryset(self):
 
-        return self.request.user.library.issues.get_queryset()
+        return self.request.user.library.issues.get_queryset().order_by('-id')
 
     def createIssue(self, itemIssueSerializer):
 
@@ -748,7 +766,7 @@ class LibraryItemIssueView(viewsets.ModelViewSet):
 
             return JsonResponse({
 
-                'status': True,
+                'success': True,
                 'message': "Item issued",
                 'id': object.pk
 
@@ -758,7 +776,7 @@ class LibraryItemIssueView(viewsets.ModelViewSet):
 
                 return JsonResponse({
 
-                    'status': False,
+                    'success': False,
                     'message': itemIssueSerializer.errors
 
                 })
@@ -767,10 +785,88 @@ class LibraryItemIssueView(viewsets.ModelViewSet):
 
         itemIssueSerializer = self.get_serializer(data = {
 
-            'item': request.GET['item'],
-            'issuedToUser': request.GET['issuedToUser'],
-            'returnDate': request.GET['returnDate']
+            'item': request.POST['item'],
+            'issuedToUser': request.POST['issuedToUser'],
+            'returnDate': request.POST['returnDate']
 
         })
 
         return self.createIssue(itemIssueSerializer)
+
+class AddUserToLibraryView(APIView):
+
+    def post(self, request):
+
+        user = Account.objects.filter(request.POST['userId'])
+
+        request.user.library.addUser({
+
+            "user": user
+
+        })
+
+        return JsonResponse({
+
+            'success': True,
+            'message': "User added to the library."
+
+        })
+
+class GetLibraryNameView(APIView):
+
+    def get(self, request):
+
+        if request.user:
+
+            return JsonResponse({
+
+                'libraryName': request.user.library.name
+
+            })
+
+class GetLibraryNameView(APIView):
+
+    def get(self, request):
+
+        if request.user:
+
+            return JsonResponse({
+
+                'libraryName': request.user.library.name
+
+            })
+
+class GetLibraryMembersView(viewsets.ModelViewSet):
+
+    serializer_class = UserAccountModelSerializer
+
+    permission_classes = (IsAuthenticated,)
+
+    filter_backends = (filters.SearchFilter,)
+
+    search_fields = ('name', 'username', 'email')
+
+    def get_queryset(self):
+
+        return self.request.user.library.users.get_queryset()
+
+    def get(self, request):
+
+        if request.user:
+
+            return JsonResponse(json.dumps(list(request.user.library.users)))
+
+
+class LibraryView(viewsets.ModelViewSet):
+
+    permission_classes = (IsAuthenticated,)
+
+    serializer_class = LibrarySerializer
+
+    filter_backends = (filters.SearchFilter,)
+
+    search_fields = ('name',)
+
+    def get_queryset(self):
+
+        return Library.objects.all()

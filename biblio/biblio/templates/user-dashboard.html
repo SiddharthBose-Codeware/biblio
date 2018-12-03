@@ -1,0 +1,214 @@
+{% load static from staticfiles %}
+
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Dashboard - Biblio</title>
+    <link rel="stylesheet" href="{% static 'bootstrap/css/bootstrap.min.css' %}">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lato:400,700,400italic">
+    <link rel="stylesheet" href="{% static 'fonts/font-awesome.min.css' %}">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Comfortaa|Kodchasan|Nunito+Sans|Rubik">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Cookie">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:400,300,600,700">
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+    <link rel="stylesheet" href="{% static 'css/Pretty-Header.css' %}">
+    <link rel="stylesheet" href="{% static 'css/Hero-Technology.css' %}">
+    <link rel="stylesheet" href="{% static 'css/Mockup-MacBook-Pro.css' %}">
+    <link rel="stylesheet" href="{% static 'css/Pretty-Registration-Form.css' %}">
+    <link rel="stylesheet" href="{% static 'css/Pretty-Footer.css' %}">
+    <link rel="stylesheet" href="{% static 'css/Pretty-Header-1.css' %}">
+    <link rel="stylesheet" href="{% static 'css/Data-Table.css' %}">
+    <link rel="stylesheet" href="{% static 'css/Data-Table2.css' %}">
+    <link rel="stylesheet" href="{% static 'css/Features-Boxed.css' %}">
+    <link rel="stylesheet" href="{% static 'css/Highlight-Clean.css' %}">
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.10.15/css/dataTables.bootstrap.min.css">
+    <link rel="stylesheet" href="{% static 'css/Login-Form-Clean.css' %}">
+    <link rel="stylesheet" href="{% static 'css/Navigation-Menu-1.css' %}">
+    <link rel="stylesheet" href="{% static 'css/Navigation-Menu.css' %}">
+    <link rel="stylesheet" href="{% static 'css/Sidebar-Menu.css' %}">
+    <link rel="stylesheet" href="{% static 'css/Sidebar-Menu1.css' %}">
+    <link rel="stylesheet" href="{% static 'css/userdashboard.css' %}">
+    <link rel="stylesheet" href="{% static 'css/User-Tasks-and-User-Activity-Streams---List-Group-Component.css' %}">
+</head>
+
+<body>
+    <nav class="navbar navbar-light navbar-expand-md custom-header">
+        <div class="container-fluid"><a class="navbar-brand navbar-custom-brand" href="#">biblio User Dashboard</a><button class="navbar-toggler" data-toggle="collapse" data-target="#navbar-collapse"><span class="sr-only">Toggle navigation</span><span class="navbar-toggler-icon"></span></button>
+            <div
+                class="collapse navbar-collapse" id="navbar-collapse">
+                <ul class="nav navbar-nav links"></ul>
+                <ul class="nav navbar-nav ml-auto">
+                    <li class="dropdown"><a class="dropdown-toggle nav-link" data-toggle="dropdown" aria-expanded="false" href="#"> <img src="assets/img/avatar.jpg" class="dropdown-image"></a>
+                        <div class="dropdown-menu dropdown-menu-right" role="menu"><a class="dropdown-item" role="presentation" href="#" style="color:rgb(255,255,255);font-family:Comfortaa, cursive;">Log out </a></div>
+                    </li>
+                </ul>
+        </div>
+        </div>
+    </nav>
+    <ul class="nav nav-tabs">
+        <li class="nav-item"><a id="search-libraries-link" class="nav-link" href="#">Search Libraries</a></li>
+        <li class="nav-item"><a id="notifications-link" class="nav-link" href="#">Notifications</a></li>
+        <li class="nav-item"><a id="check-books-link" class="nav-link" href="#">Check books</a></li>
+    </ul>
+    <div class="content" id="search-libraries-div" style="display: none;">
+        <h1>Search Libraries</h1>
+        <div class="form-group">
+            <div class="input-group">
+                <div class="input-group-prepend"></div><input class="form-control" type="text">
+                <div class="input-group-append"><button id="search-libraries-btn" class="btn btn-primary" type="button">Go!</button></div>
+            </div>
+        </div>
+        <div class="table-responsive">
+            <table class="table search-library-table">
+                <thead>
+                    <tr>
+                        <th>Library Name</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Name of library</td>
+                        <td><button class="btn btn-primary membership-button" type="button">Apply for membership</button><button class="btn btn-primary membership-button" type="button">Withdraw membership</button></td>
+                    </tr>
+                    <tr>
+                        <td>Name of library</td>
+                        <td>Cell 4</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div class="content" id="notifications-div" style="display: none;">
+        <h1>Notifications</h1>
+        <div class="notifications-wrapper">
+            <div class="each-notification">
+                <p class="each-notification-content">Something happend</p>
+                <div class="each-notification-date-wrapper">
+                    <p class="each-notification-date">1/2/3/4/5</p>
+                </div>
+            </div>
+            <div class="each-notification">
+                <p class="each-notification-content">Something happend</p>
+                <div class="each-notification-date-wrapper">
+                    <p class="each-notification-date">1/2/3/4/5</p>
+                </div>
+            </div>
+            <div class="each-notification">
+                <p class="each-notification-content">Something happend</p>
+                <div class="each-notification-date-wrapper">
+                    <p class="each-notification-date">1/2/3/4/5</p>
+                </div>
+            </div>
+            <div class="each-notification">
+                <p class="each-notification-content">Something happend</p>
+                <div class="each-notification-date-wrapper">
+                    <p class="each-notification-date">1/2/3/4/5</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="content" id="check-books-div" style="display: none;">
+        <h1>Check Books</h1>
+        <div class="notifications-wrapper">
+            <div class="each-notification">
+                <p class="each-notification-content">Something happend</p>
+                <div class="each-notification-date-wrapper">
+                    <p class="book-issued">Issued on</p>
+                </div>
+            </div>
+            <div class="each-notification">
+                <p class="each-notification-content">Something happend</p>
+                <div class="each-notification-date-wrapper">
+                    <p class="each-notification-return-expired">1/2/3/4/5</p>
+                </div>
+            </div>
+            <div class="each-notification">
+                <p class="each-notification-content">Something happend</p>
+                <div class="each-notification-date-wrapper">
+                    <p class="each-notification-date">1/2/3/4/5</p>
+                </div>
+            </div>
+            <div class="each-notification">
+                <p class="each-notification-content">Something happend</p>
+                <div class="each-notification-date-wrapper">
+                    <p class="each-notification-date">1/2/3/4/5</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="{% static 'js/verification.js' %}"></script>
+    <script src="{% static 'js/jquery.min.js' %}"></script>
+    <script src="{% static 'bootstrap/js/bootstrap.min.js' %}"></script>
+    <script src="https://cdn.datatables.net/1.10.15/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.10.15/js/dataTables.bootstrap.min.js"></script>
+    <script src="{% static 'js/Sidebar-Menu.js' %}"></script>
+    <script type="text/javascript">
+    $("#notifications-link").click(function() {
+
+      $("#notifications-div").show();
+      $("#search-libraries-div").hide();
+      $("#check-books-div").hide();
+
+    });
+
+    $("#search-libraries-link").click(function() {
+
+      $("#search-libraries-div").show();
+      $("#notifications-div").hide();
+      $("#check-books-div").hide();
+
+    });
+
+    $("#check-books-link").click(function() {
+
+      $("#check-books-div").show();
+      $("#search-libraries-div").hide();
+      $("#notifications-div").hide();
+
+    });
+
+    $("#search-libraries-btn").click(function() {
+
+      $.ajax({
+
+        url: "http://localhost:8000/api/libraries",
+
+        type: "GET",
+
+        data: {
+
+          search: $("#search-libraries-input").val()
+
+        },
+
+        headers: {
+
+          "Authorization": "Bearer " + getVerifiedAccessKey()
+
+        },
+
+        success: function(response) {
+
+          var tableData = "";
+
+          response.forEach(function(eachLibrary) {
+
+            tableData += "<tr><td>" + eachLibrary.name + "</td><td>" +  + "</td></tr>";
+
+          });
+
+
+
+        }
+
+      });
+
+    });
+    </script>
+</body>
+
+</html>

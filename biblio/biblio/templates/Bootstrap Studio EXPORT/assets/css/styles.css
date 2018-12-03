@@ -1,0 +1,51 @@
+a.navbar-brand.navbar-link {
+  font-family:Comfortta;
+}
+
+a.navbar-brand.navbar-link {
+  font-family:Comfortaa;
+}
+
+div.row.center-text {
+  text-align:center;
+}
+
+div.jumbotron.hero-technology.custom-hero {
+  margin-bottom:0;
+}
+
+a.btn.btn-primary.hero-btn {
+  margin-right:10px;
+}
+
+div.checkbox.custom-checkbox {
+  color:#CCCCCC;
+}
+
+hero-bg {
+  background-image:url("../../assets/img/screen-content-macbook.jpg");
+  background-repeat:no-repeat;
+  width:100%;
+  background-size:cover;
+}
+
+div.col-lg-1.col-lg-offset-0.col-md-8.col-md-offset-2.hero-bg {
+  background-image:url("../../assets/img/screen-content-macbook.jpg");
+  background-position:center;
+  background-repeat:no-repeat;
+  background-size:contain;
+}
+
+div.col-lg-12.col-lg-offset-0.col-md-8.col-md-offset-0.hero-bg {
+  background-image:url("../../assets/img/screen-content-macbook.jpg");
+  background-size:cover;
+  background-position:center;
+  background-repeat:no-repeat;
+  width:100%;
+  padding:20px 0;
+}
+
+a.custom-brand {
+  font-family:'Comfortaa';
+}
+

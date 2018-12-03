@@ -21,7 +21,7 @@ class LibrarySubjectType(models.Model):
 
      parent = models.ForeignKey('self', on_delete = models.CASCADE, blank = True, null = True)
 
-     itemTypeValue = models.CharField(max_length = 200, default = "", unique = True)
+     type = models.CharField(max_length = 200, default = "", unique = True)
 
 class LibraryAuthor(models.Model):
 
@@ -39,11 +39,11 @@ class LibraryItem(PolymorphicModel):
 
     name = models.CharField(max_length = 400, default = "")
 
-    author = models.ForeignKey(LibraryAuthor, on_delete = models.CASCADE)
+    author = models.ForeignKey('LibraryAuthor', on_delete = models.CASCADE)
 
-    itemType = models.ForeignKey(LibraryItemType, on_delete = models.CASCADE)
+    itemType = models.ForeignKey('LibraryItemType', on_delete = models.CASCADE)
 
-    subjectType = models.ForeignKey(LibrarySubjectType, on_delete = models.CASCADE)
+    subjectType = models.ForeignKey('LibrarySubjectType', on_delete = models.CASCADE)
 
 class LibraryBookItem(LibraryItem):
 
@@ -51,11 +51,11 @@ class LibraryBookItem(LibraryItem):
 
 class LibraryItemIssue(models.Model):
 
-    item = models.ForeignKey(LibraryItem, on_delete = models.CASCADE)
+    item = models.ForeignKey('LibraryItem', on_delete = models.CASCADE)
 
     issuedToUser = models.ForeignKey('UserAccount', on_delete = models.CASCADE)
 
-    issuedAT = models.DateField(auto_now = True)
+    issuedAt = models.DateField(auto_now = True)
 
     returnDate = models.DateField()
 
@@ -63,23 +63,25 @@ class Library(models.Model):
 
     name = models.CharField(max_length = 1000, default = "")
 
-    subjectTypes = models.ManyToManyField(LibrarySubjectType)
+    subjectTypes = models.ManyToManyField('LibrarySubjectType')
 
-    authors = models.ManyToManyField(LibraryAuthor)
+    authors = models.ManyToManyField('LibraryAuthor')
 
-    itemTypes = models.ManyToManyField(LibraryItemType)
+    itemTypes = models.ManyToManyField('LibraryItemType')
 
-    items = models.ManyToManyField(LibraryItem)
+    items = models.ManyToManyField('LibraryItem')
 
-    issues = models.ManyToManyField(LibraryItemIssue)
+    issues = models.ManyToManyField('LibraryItemIssue')
 
-    def addSubjectType(self, itemTypeValue, parent = None, isRoot = False):
+    users = models.ManyToManyField('UserAccount')
 
-        print(itemTypeValue)
+    def addSubjectType(self, type, parent = None, isRoot = False):
+
+        print(type)
 
         subjectType = LibrarySubjectType()
 
-        subjectType.itemTypeValue = itemTypeValue
+        subjectType.type = type
 
         if not isRoot:
 
@@ -111,7 +113,7 @@ class Library(models.Model):
 
             item = LibraryItemType()
 
-            item.type = None
+            item.type = "Book"
 
         else:
 
@@ -158,6 +160,8 @@ class Library(models.Model):
 
         issue = LibraryItemIssue()
 
+        print(data)
+
         issue.item = data['item']
 
         issue.issuedToUser = data['issuedToUser']
@@ -169,6 +173,14 @@ class Library(models.Model):
         self.issues.add(issue)
 
         return issue
+
+    def addUser(self, data):
+
+        user = data['user']
+
+        self.users.add(user)
+
+        return user
 
 class Account(AbstractBaseUser, PolymorphicModel):
 
@@ -191,7 +203,6 @@ class Account(AbstractBaseUser, PolymorphicModel):
         if 'lastname' in data:
             self.last_name = data['lastname']
         if 'email' in data:
-            print("\n\n\n\n\n\n\n\n\n\n\n\n\n\nMadPerson\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n")
             self.email = data['email']
         if 'password' in data:
             self.set_password(data['password']) # Creating argon2 password hasher object and hashing the password
@@ -202,7 +213,7 @@ class AdminAccount(Account):
 
     objects = AdminManager()
 
-    library = models.ForeignKey(Library, on_delete = models.PROTECT)
+    library = models.ForeignKey('Library', on_delete = models.PROTECT)
 
     def update(self, data):
 
